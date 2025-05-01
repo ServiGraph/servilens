@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option go_package = "github.com/ServiGraph/servilens/api/tracer";
+
+package tracer;
+
+import "api/google/api/annotations.proto";
+
+service TracerService {
+    rpc FetchTraceData (FetchTraceDataRequest) returns (FetchTraceDataResponse) {
+        option (google.api.http) = {
+            get: "/v1/fetchTraceData"
+            additional_bindings { get: "/v1/fetchTraceData/{from_unix_timestamp}" }
+        };
+    }
+}
+
+message FetchTraceDataRequest {
+    uint64 from_unix_timestamp = 1;
+}
+
+message FetchTraceDataResponse {
+    repeated Node nodes = 1;
+    repeated Span links = 2;
+}
+
+message Node {
+    string id = 1;
+}
+
+message Span {
+    string source = 1;
+    string target = 2;
+    SpanData data = 3;
+}
+
+message SpanData {
+    int64 total_count = 1;
+}

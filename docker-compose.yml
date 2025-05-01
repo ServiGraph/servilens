@@ -1,0 +1,13 @@
+services:
+  tracer:
+    build:
+      context: .
+      args:
+        MAIN_PATH: ./cmd/tracer/server.go
+    container_name: tracer
+    ports:
+        - "8090:8090"
+
+networks:
+  default:
+    name: demo
