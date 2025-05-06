@@ -33,3 +33,16 @@ protos: $(PROTO_FILES:.proto=.pb.go) $(PROTO_FILES:.proto=.pb.go.grpc.go)
 
 %.gw.pb.go: %.proto
 	@$(PROTOC) $(GRPC_FLAGS) $(GATEWAY_FLAGS) $<
+
+test: protos
+	@echo "Running tests..."
+	@go test -v -cover ./...
+
+test-coverage: protos
+	@echo "Running tests with coverage report..."
+	@go test -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
+	@echo "Open coverage.html in your browser"
+
+test-basic: protos
+	@go test ./...

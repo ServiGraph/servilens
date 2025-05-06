@@ -13,9 +13,14 @@ import (
 	"google.golang.org/grpc"
 )
 
+// allowCORS adds CORS headers to enable cross-origin requests from web clients.
+// This basic implementation allows:
+// - Origin: http://localhost:3000 (typical frontend dev server)
+// - Methods: GET, POST, OPTIONS
+// - Headers: Content-Type, Authorization
 func allowCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Adjust this based on frontend origin
+		// TODO: Adjust this based on frontend origin. Hardcoded for demo purposes.
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -29,7 +34,11 @@ func allowCORS(h http.Handler) http.Handler {
 	})
 }
 
+// main initializes and runs two servers concurrently:
+// 1. gRPC server (port 5678) for OTLP trace ingestion
+// 2. HTTP server (port 8090) with gRPC-Gateway for REST access
 func main() {
+	// gRPC Server Setup
 	lis, err := net.Listen("tcp", "0.0.0.0:5678") // OTLP default gRPC port
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -37,9 +46,10 @@ func main() {
 
 	srv := tracer.NewTraceCollectorService()
 	grpcServer := grpc.NewServer()
-	v1.RegisterTraceServiceServer(grpcServer, srv)
-	tracerPb.RegisterTracerServiceServer(grpcServer, srv)
+	v1.RegisterTraceServiceServer(grpcServer, srv)        // OTLP endpoint
+	tracerPb.RegisterTracerServiceServer(grpcServer, srv) // Custom visualization endpoint
 
+	// gRPC-Gateway Setup
 	gwmux := runtime.NewServeMux()
 	if err = tracerPb.RegisterTracerServiceHandlerServer(context.Background(), gwmux, srv); err != nil {
 		log.Fatalln("Failed to register gateway:", err)
@@ -50,6 +60,7 @@ func main() {
 		Handler: corsWrappedMux,
 	}
 
+	// Concurrent Server Execution
 	log.Println("OTLP trace consumer running on :5678...")
 	go func() {
 		log.Fatalln(grpcServer.Serve(lis))

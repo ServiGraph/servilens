@@ -49,6 +49,16 @@ Here is an architecture diagram of the ServiLens backend: <br>
 - The backend encodes the data and pushes the data back to the frontend in the form of a JSON blob.
 - The frontend parses the data and shows the visualisation and metrics on the frontend as per requirements.
 
+## Testing
+To run the tests with coverage, you can use the following command:
+```bash
+make test
+```
+To run the tests without coverage, you can use the following command:
+```bash
+make test-basic
+```
+
 ## License
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
